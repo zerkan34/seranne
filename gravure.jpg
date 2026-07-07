@@ -1,0 +1,60 @@
+import { useEffect, useState } from 'react';
+import Hero from './components/Hero';
+import Piece from './components/Piece';
+import Savoir from './components/Savoir';
+import Footer from './components/Footer';
+import SideIndex from './components/SideIndex';
+import ZoomModal from './components/ZoomModal';
+import { pieces } from './pieces';
+
+const sections = [
+  { num: '001', name: 'Maison',       id: 's-maison' },
+  ...pieces.map(p => ({ num: p.num, name: `${p.article} ${p.name}`.trim(), id: `s-${p.id}` })),
+  { num: '007', name: 'Savoir-faire', id: 's-savoir' },
+];
+
+export default function App() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [zoomPiece, setZoomPiece] = useState(null);
+
+  // Track which section is centered in viewport (IntersectionObserver + scroll pos).
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        // Find the entry closest to the center of the viewport that is intersecting.
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible.length === 0) return;
+        const topEntry = visible[0].target;
+        const id = topEntry.id;
+        const idx = sections.findIndex(s => s.id === id);
+        if (idx !== -1) setActiveIndex(idx);
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <>
+      <SideIndex activeIndex={activeIndex} sections={sections} />
+
+      <Hero />
+
+      {pieces.map(p => (
+        <Piece key={p.id} piece={p} onOpenImage={setZoomPiece} />
+      ))}
+
+      <Savoir />
+
+      <Footer />
+
+      <ZoomModal piece={zoomPiece} onClose={() => setZoomPiece(null)} />
+    </>
+  );
+}

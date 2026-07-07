@@ -1,0 +1,53 @@
+import { motion, AnimatePresence } from 'motion/react';
+import { spring } from '../motion';
+import styles from './SideIndex.module.css';
+
+export default function SideIndex({ activeIndex, sections }) {
+  const active = sections[activeIndex] || sections[0];
+  const total = String(sections.length).padStart(3, '0');
+  const num = active.num;
+
+  return (
+    <motion.aside
+      className={styles.idx}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.4, delay: 0.4 }}
+    >
+      <div className={styles.top}>
+        <b>Séranne</b>
+        <span className={styles.mute}>Paris — depuis 2022</span>
+      </div>
+
+      <div className={styles.bot}>
+        <span className={styles.counter}>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={num}
+              className={styles.now}
+              initial={{ y: 14, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -14, opacity: 0 }}
+              transition={spring.precise}
+            >
+              {num}
+            </motion.span>
+          </AnimatePresence>
+          <span className={styles.mute}> / {total}</span>
+        </span>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={active.name}
+            className={styles.label}
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -10, opacity: 0 }}
+            transition={spring.precise}
+          >
+            {active.name}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+    </motion.aside>
+  );
+}
